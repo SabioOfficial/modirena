@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "modirena",
+  "version": "${version}",
+  "name": "Modirena",
+  "description": "Utility-based wands!",
+  "authors": [],
+  "contact": {},
+  "license": "GPL-3.0",
+  "icon": "assets/modirena/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "net.sabio.modirena.Modirena"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
