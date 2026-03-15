@@ -3,7 +3,7 @@
   "id": "modirena",
   "version": "${version}",
   "name": "Modirena",
-  "description": "Utility-based wands!",
+  "description": "A modifier-based PVP arena minigame.",
   "authors": [],
   "contact": {},
   "license": "GPL-3.0",
