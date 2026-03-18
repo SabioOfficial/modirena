@@ -9,5 +9,7 @@ public class Modirena implements ModInitializer {
     @Override
     public void onInitialize() {
         LOGGER.info("modirena is running successfully");
+        GameManager.getInstance();
+        LOGGER.info("gamemanager ready. state " + GameManager.getInstance().getState());
     }
 }
