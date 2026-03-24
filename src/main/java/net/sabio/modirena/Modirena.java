@@ -16,5 +16,7 @@ public class Modirena implements ModInitializer {
         LOGGER.info("registered modifiers " + ModifierRegistry.getAll().size());
         ModirenaCommands.register();
         LOGGER.info("registered commands");
+        PlayerManager.getInstance();
+        LOGGER.info("playermanager ready.");
     }
 }
