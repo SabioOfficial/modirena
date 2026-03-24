@@ -22,7 +22,8 @@ public class ModirenaCommands {
         ));
     }
     private static int startGame(CommandContext<ServerCommandSource> context) {
-        GameManager.getInstance().startGame(context.getSource().getServer());
+        GameManager.getInstance().setServer(context.getSource().getServer());
+        GameManager.getInstance().startGame();
         return 1;
     }
     private static int joinGame(CommandContext<ServerCommandSource> context) {

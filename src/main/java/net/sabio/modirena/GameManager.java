@@ -38,7 +38,7 @@ public class GameManager {
         this.state = state;
         Modirena.LOGGER.info("state changed to " + state);
     }
-    public void startGame(MinecraftServer server) {
+    public void startGame() {
         if (state != GameState.WAITING) {
             Modirena.LOGGER.warning("startGame called twice but the state is " + state);
             return;
@@ -53,10 +53,14 @@ public class GameManager {
         timer.start(15, this::transitionToCombat);
     }
     private void transitionToCombat() {
+        if (server == null) {
+            setState(GameState.WAITING);
+            return;
+        }
         Modifier winner = VoteManager.getInstance().tallyVotes();
         if (winner != null) {
             activeModifiers.add(winner);
-            winner.onActivate();
+            winner.onActivate(server);
             Modirena.LOGGER.info(winner.getDisplayName() + " is the modifier for this round");
         }
         setState(GameState.COMBAT);
@@ -64,8 +68,12 @@ public class GameManager {
         timer.start(90, this::transitionToResults);
     }
     private void transitionToResults() {
+        for (Modifier modifier : activeModifiers) {
+            modifier.onDeactivate(server);
+        }
         setState(GameState.RESULTS);
         Modirena.LOGGER.info("results phase started. 10 seconds to see results. active modifiers: " + activeModifiers);
+        activeModifiers.clear();
         timer.start(10, this::transitionToVoting);
     }
 }
