@@ -73,6 +73,10 @@ public class Modirena implements ModInitializer {
                 GameManager.getInstance().getTimer().stop();
             }
         });
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+            if (!(entity instanceof ServerPlayerEntity)) return true;
+            return GameManager.getInstance().getState() == GameState.COMBAT;
+        });
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
             if (!(entity instanceof ServerPlayerEntity player)) return;
             if (GameManager.getInstance().getState() != GameState.COMBAT) return;
