@@ -6,7 +6,6 @@ import net.sabio.modirena.modifier.Modifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GameManager {
     private static GameManager instance;
@@ -14,12 +13,17 @@ public class GameManager {
     private final RoundTimer timer = new RoundTimer();
     private final List<Modifier> activeModifiers = new ArrayList<>();
     private MinecraftServer server;
+    private int currentRound = 0;
+    private static final int ROUNDS_PER_GAME = 5;
     private GameManager() {}
     public static GameManager getInstance() {
         if (instance == null) {
             instance = new GameManager();
         }
         return instance;
+    }
+    public int getCurrentRound() {
+        return currentRound;
     }
     public GameState getState() {
         return state;
@@ -53,11 +57,12 @@ public class GameManager {
         transitionToVoting();
     }
     private void transitionToVoting() {
+        currentRound++;
         setState(GameState.VOTING);
         VoteManager.getInstance().startVote(3);
+        server.execute(() -> VoteManager.getInstance().giveVoteItems(server));
         Modirena.LOGGER.info("voting phase started, 15 seconds to vote");
         timer.start(15, this::transitionToCombat);
-        server.execute(() -> VoteManager.getInstance().giveVoteItems(server));
     }
     private void transitionToCombat() {
         if (server == null) {
@@ -82,11 +87,14 @@ public class GameManager {
         }
         setState(GameState.RESULTS);
         ArenaManager.getInstance().resetArena(server);
-        activeModifiers.clear();
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             ArenaManager.getInstance().sendPlayerToLobby(player);
         }
-        timer.start(10, this::transitionToVoting);
+        if (currentRound < ROUNDS_PER_GAME) {
+            timer.start(10, this::transitionToVoting);
+        } else {
+            timer.start(10, this::gameFinished);
+        }
     }
     public void checkRoundEnd() {
         if (state != GameState.COMBAT) return;
@@ -97,5 +105,10 @@ public class GameManager {
             timer.stop();
             transitionToResults();
         }
+    }
+    private void gameFinished() {
+        currentRound = 0;
+        activeModifiers.clear();
+        timer.start(20, this::transitionToVoting);
     }
 }

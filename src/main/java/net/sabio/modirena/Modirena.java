@@ -129,6 +129,9 @@ public class Modirena implements ModInitializer {
                 );
             } else {
                 ArenaManager.getInstance().sendPlayerToLobby(newPlayer);
+                if (GameManager.getInstance().getState() == GameState.VOTING) {
+                    VoteManager.getInstance().giveVoteItemsTo(newPlayer);
+                }
             }
         });
         ServerTickEvents.END_SERVER_TICK.register(server -> {
