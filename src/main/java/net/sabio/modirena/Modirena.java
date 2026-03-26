@@ -1,7 +1,10 @@
 package net.sabio.modirena;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.sabio.modirena.modifier.Modifier;
 import net.sabio.modirena.modifier.ModifierRegistry;
 
@@ -20,6 +23,22 @@ public class Modirena implements ModInitializer {
         LOGGER.info("registered commands");
         PlayerManager.getInstance();
         LOGGER.info("playermanager ready.");
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            GameManager.getInstance().setServer(server);
+            ConfigManager.load();
+            if (!ConfigManager.isSetUp()) {
+                LOGGER.info("first boot detected, so im placing structures now");
+                StructureLoader.placeAll(server);
+                ConfigManager.markSetUp();
+            } else {
+                LOGGER.info("structures have already been placed");
+            }
+        });
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayerEntity player = handler.player;
+            ServerWorld overworld = server.getOverworld();
+            player.teleport(overworld, 10.0, 65.0, 9.0, java.util.Set.of(), 0.0f, 0.0f, false);
+        });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             if (GameManager.getInstance().getState() != GameState.WAITING) {
                 for (Modifier modifier : GameManager.getInstance().getActiveModifiers()) {
