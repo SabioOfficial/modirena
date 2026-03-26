@@ -68,8 +68,8 @@ public class ArenaManager {
         int centerX = 241;
         int centerY = 65;
         int centerZ = 41;
-        int radius = 30;
-        int totalPoints = Math.max(playerCount, 15);
+        int radius = 28;
+        int totalPoints = Math.max(playerCount, 3);
         List<int[]> points = new ArrayList<>();
         for (int i = 0; i < totalPoints; i++) {
             double angle = 2 * Math.PI * i / totalPoints;
