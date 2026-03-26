@@ -23,12 +23,6 @@ public class StructureLoader {
         ServerWorld world = server.getOverworld();
         place(server, world, "modirena_lobby", LOBBY_ORIGIN);
         place(server, world, "modirena_arena", ARENA_ORIGIN);
-        assert world.getServer() != null;
-        world.getServer().setSpawnPoint(WorldProperties.SpawnPoint.create(
-                world.getRegistryKey(),
-                new BlockPos(10, 65, 9),
-                0.0f, 0.0f
-        ));
         Modirena.LOGGER.info("structures placed successfully");
     }
     private static void place(MinecraftServer server, ServerWorld world, String name, BlockPos origin) {
@@ -49,7 +43,6 @@ public class StructureLoader {
             Modirena.LOGGER.info("placed structure " + name + " at " + origin);
         } catch (Exception exception) {
             Modirena.LOGGER.warning("failed to place structure " + name + " " + exception.getMessage());
-            exception.printStackTrace();
         }
     }
     private static void clearArea(ServerWorld world, BlockPos origin, Vec3i size) {
