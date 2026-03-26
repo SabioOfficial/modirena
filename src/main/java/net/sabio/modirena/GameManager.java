@@ -53,11 +53,17 @@ public class GameManager {
             Modirena.LOGGER.warning("not enough players to start game");
             return;
         }
+        currentRound = 1;
         activeModifiers.clear();
         transitionToVoting();
     }
     private void transitionToVoting() {
-        currentRound++;
+        if (PlayerManager.getInstance().getPlayerCount() < 2) {
+            setState(GameState.WAITING);
+            currentRound = 0;
+            activeModifiers.clear();
+            return;
+        }
         setState(GameState.VOTING);
         VoteManager.getInstance().startVote(3);
         server.execute(() -> VoteManager.getInstance().giveVoteItems(server));
@@ -91,6 +97,7 @@ public class GameManager {
             ArenaManager.getInstance().sendPlayerToLobby(player);
         }
         if (currentRound < ROUNDS_PER_GAME) {
+            currentRound++;
             timer.start(10, this::transitionToVoting);
         } else {
             timer.start(10, this::gameFinished);
@@ -109,6 +116,6 @@ public class GameManager {
     private void gameFinished() {
         currentRound = 0;
         activeModifiers.clear();
-        timer.start(20, this::transitionToVoting);
+        setState(GameState.WAITING);
     }
 }
