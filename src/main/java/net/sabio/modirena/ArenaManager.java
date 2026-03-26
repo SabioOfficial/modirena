@@ -27,6 +27,7 @@ public class ArenaManager {
             int[] position = spawnPoints.get(i % spawnPoints.size());
             resetPlayer(player);
             giveGear(player);
+            PlayerManager.getInstance().setState(player, PlayerState.ALIVE);
             player.teleport(server.getOverworld(), position[0], position[1], position[2], Set.of(), 0f, 0f, false);
             player.changeGameMode(GameMode.SURVIVAL);
         }

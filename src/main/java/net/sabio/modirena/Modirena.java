@@ -17,7 +17,9 @@ import net.minecraft.world.rule.GameRules;
 import net.sabio.modirena.modifier.Modifier;
 import net.sabio.modirena.modifier.ModifierRegistry;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -61,7 +63,24 @@ public class Modirena implements ModInitializer {
             player.getInventory().clear();
             player.clearStatusEffects();
             player.changeGameMode(GameMode.ADVENTURE);
-            player.teleport(overworld, 10.0, 65.0, 9.0, java.util.Set.of(), 0.0f, 0.0f, false);
+            if (GameManager.getInstance().getState() == GameState.COMBAT) {
+                PlayerManager.getInstance().setState(player, PlayerState.SPECTATING);
+                player.changeGameMode(GameMode.SPECTATOR);
+                server.execute(() -> {
+                    List<ServerPlayerEntity> alive = server.getPlayerManager().getPlayerList().stream()
+                            .filter(serverPlayer -> PlayerManager.getInstance().getState(serverPlayer) == PlayerState.ALIVE)
+                            .toList();
+                    if (!alive.isEmpty()) {
+                        ServerPlayerEntity target = alive.get(new Random().nextInt(alive.size()));
+                        player.teleport(
+                                overworld, target.getX(), target.getY(), target.getZ(), Set.of(), target.getYaw(),
+                                target.getPitch(), false
+                        );
+                    }
+                });
+            } else {
+                player.teleport(overworld, 10.0, 65.0, 9.0, Set.of(), 0.0f, 0.0f, false);
+            }
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             if (GameManager.getInstance().getState() != GameState.WAITING) {
