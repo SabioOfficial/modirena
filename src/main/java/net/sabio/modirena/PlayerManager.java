@@ -20,6 +20,9 @@ public class PlayerManager {
     public void addPlayer(ServerPlayerEntity player) {
         players.put(player.getUuid(), PlayerState.LOBBY);
         Modirena.LOGGER.info(player.getName().getString() + " added to modirena");
+        if (players.size() >= 2 && GameManager.getInstance().getState() == GameState.WAITING) {
+            GameManager.getInstance().startGame();
+        }
     }
     public void removePlayer(ServerPlayerEntity player) {
         players.remove(player.getUuid());

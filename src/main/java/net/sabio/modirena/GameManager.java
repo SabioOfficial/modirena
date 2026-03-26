@@ -44,6 +44,10 @@ public class GameManager {
             Modirena.LOGGER.warning("startGame called twice but the state is " + state);
             return;
         }
+        if (PlayerManager.getInstance().getPlayerCount() < 2) {
+            Modirena.LOGGER.warning("not enough players to start game");
+            return;
+        }
         activeModifiers.clear();
         transitionToVoting();
     }
