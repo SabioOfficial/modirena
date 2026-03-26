@@ -56,12 +56,14 @@ public class GameManager {
         VoteManager.getInstance().startVote(3);
         Modirena.LOGGER.info("voting phase started, 15 seconds to vote");
         timer.start(15, this::transitionToCombat);
+        server.execute(() -> VoteManager.getInstance().giveVoteItems(server));
     }
     private void transitionToCombat() {
         if (server == null) {
             setState(GameState.WAITING);
             return;
         }
+        VoteManager.getInstance().clearVoteItems(server);
         Modifier winner = VoteManager.getInstance().tallyVotes();
         if (winner != null) {
             activeModifiers.add(winner);

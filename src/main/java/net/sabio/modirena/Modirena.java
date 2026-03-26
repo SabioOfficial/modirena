@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
@@ -79,10 +80,17 @@ public class Modirena implements ModInitializer {
                     }
                 });
             } else {
-                player.teleport(overworld, 10.0, 65.0, 9.0, Set.of(), 0.0f, 0.0f, false);
+                player.teleport(overworld, 10.0, 65.0, 9.0, java.util.Set.of(), 0.0f, 0.0f, false);
+                if (GameManager.getInstance().getState() == GameState.VOTING) {
+                    server.execute(() -> VoteManager.getInstance().giveVoteItemsTo(player));
+                }
             }
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            ServerPlayerEntity player = handler.player;
+            PlayerState state = PlayerManager.getInstance().getState(player);
+            PlayerManager.getInstance().removePlayer(player);
+            if (state != PlayerState.ALIVE) return;
             if (GameManager.getInstance().getState() != GameState.WAITING) {
                 for (Modifier modifier : GameManager.getInstance().getActiveModifiers()) {
                     modifier.onDeactivate(server);
@@ -115,6 +123,19 @@ public class Modirena implements ModInitializer {
                 );
             } else {
                 ArenaManager.getInstance().sendPlayerToLobby(newPlayer);
+            }
+        });
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            if (GameManager.getInstance().getState() != GameState.VOTING) return;
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                if (!PlayerManager.getInstance().isInGame(player)) continue;
+                int slot = player.getInventory().getSelectedSlot();
+                Integer last = VoteManager.getInstance().getLastSlot(player.getUuid());
+                if (last != null && last == slot) continue;
+                VoteManager.getInstance().setLastSlot(player.getUuid(), slot);
+                if (slot < VoteManager.getInstance().getCurrentOptions().size()) {
+                    VoteManager.getInstance().castVote(player.getUuid(), slot);
+                }
             }
         });
     }
