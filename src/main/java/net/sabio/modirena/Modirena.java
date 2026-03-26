@@ -97,12 +97,15 @@ public class Modirena implements ModInitializer {
             ServerPlayerEntity player = handler.player;
             PlayerState state = PlayerManager.getInstance().getState(player);
             PlayerManager.getInstance().removePlayer(player);
+            int remaining = PlayerManager.getInstance().getPlayerCount();
+            if (GameManager.getInstance().getState() == GameState.VOTING && remaining < 2) {
+                GameManager.getInstance().getTimer().stop();
+                GameManager.getInstance().setState(GameState.WAITING);
+                VoteManager.getInstance().clearVoteItems(server);
+                return;
+            }
             if (state != PlayerState.ALIVE) return;
             if (GameManager.getInstance().getState() != GameState.COMBAT) return;
-            for (Modifier modifier : GameManager.getInstance().getActiveModifiers()) {
-                modifier.onDeactivate(server);
-            }
-            GameManager.getInstance().getActiveModifiers().clear();
             GameManager.getInstance().checkRoundEnd();
         });
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
