@@ -1,6 +1,7 @@
 package net.sabio.modirena;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.sabio.modirena.modifier.Modifier;
 
 import java.util.ArrayList;
@@ -60,10 +61,10 @@ public class GameManager {
         Modifier winner = VoteManager.getInstance().tallyVotes();
         if (winner != null) {
             activeModifiers.add(winner);
-            winner.onActivate(server);
             Modirena.LOGGER.info(winner.getDisplayName() + " is the modifier for this round");
         }
         setState(GameState.COMBAT);
+        ArenaManager.getInstance().sendPlayersToArena(server);
         Modirena.LOGGER.info("combat phase started. 90 seconds till end");
         timer.start(90, this::transitionToResults);
     }
@@ -74,6 +75,9 @@ public class GameManager {
         setState(GameState.RESULTS);
         Modirena.LOGGER.info("results phase started. 10 seconds to see results. active modifiers: " + activeModifiers);
         activeModifiers.clear();
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            ArenaManager.getInstance().sendPlayerToLobby(player);
+        }
         timer.start(10, this::transitionToVoting);
     }
 }
