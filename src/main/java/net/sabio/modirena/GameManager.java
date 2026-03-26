@@ -81,7 +81,7 @@ public class GameManager {
             modifier.onDeactivate(server);
         }
         setState(GameState.RESULTS);
-        Modirena.LOGGER.info("results phase started. 10 seconds to see results. active modifiers: " + activeModifiers);
+        ArenaManager.getInstance().resetArena(server);
         activeModifiers.clear();
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             ArenaManager.getInstance().sendPlayerToLobby(player);

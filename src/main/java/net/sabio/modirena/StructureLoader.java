@@ -25,7 +25,7 @@ public class StructureLoader {
         place(server, world, "modirena_arena", ARENA_ORIGIN);
         Modirena.LOGGER.info("structures placed successfully");
     }
-    private static void place(MinecraftServer server, ServerWorld world, String name, BlockPos origin) {
+    public static void place(MinecraftServer server, ServerWorld world, String name, BlockPos origin) {
         try {
             String path = "/data/modirena/structures/" + name + ".nbt";
             InputStream stream = StructureLoader.class.getResourceAsStream(path);

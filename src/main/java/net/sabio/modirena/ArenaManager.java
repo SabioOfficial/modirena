@@ -1,11 +1,15 @@
 package net.sabio.modirena;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.Box;
 import net.minecraft.world.GameMode;
 import net.sabio.modirena.modifier.Modifier;
 
@@ -74,5 +78,18 @@ public class ArenaManager {
             points.add(new int[]{x, centerY, z});
         }
         return points;
+    }
+    public void resetArena(MinecraftServer server) {
+        ServerWorld world = server.getOverworld();
+        world.getEntitiesByType(EntityType.ITEM, entity -> {
+            Box arenaBox = new Box(
+                    StructureLoader.ARENA_ORIGIN.getX(), StructureLoader.ARENA_ORIGIN.getY() - 5,
+                    StructureLoader.ARENA_ORIGIN.getZ(),
+                    StructureLoader.ARENA_ORIGIN.getX() + 150, StructureLoader.ARENA_ORIGIN.getY() + 50,
+                    StructureLoader.ARENA_ORIGIN.getZ() + 150
+            );
+            return entity.getBoundingBox().intersects(arenaBox);
+        }).forEach(Entity::discard);
+        StructureLoader.place(server, world, "modirena_arena", StructureLoader.ARENA_ORIGIN);
     }
 }
