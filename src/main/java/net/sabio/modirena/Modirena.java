@@ -138,15 +138,21 @@ public class Modirena implements ModInitializer {
             }
         });
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            if (GameManager.getInstance().getState() != GameState.VOTING) return;
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                if (!PlayerManager.getInstance().isInGame(player)) continue;
-                int slot = player.getInventory().getSelectedSlot();
-                Integer last = VoteManager.getInstance().getLastSlot(player.getUuid());
-                if (last != null && last == slot) continue;
-                VoteManager.getInstance().setLastSlot(player.getUuid(), slot);
-                if (slot < VoteManager.getInstance().getCurrentOptions().size()) {
-                    VoteManager.getInstance().castVote(player.getUuid(), slot);
+            if (GameManager.getInstance().getState() == GameState.VOTING) {
+                for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                    if (!PlayerManager.getInstance().isInGame(player)) continue;
+                    int slot = player.getInventory().getSelectedSlot();
+                    Integer last = VoteManager.getInstance().getLastSlot(player.getUuid());
+                    if (last != null && last == slot) continue;
+                    VoteManager.getInstance().setLastSlot(player.getUuid(), slot);
+                    if (slot < VoteManager.getInstance().getCurrentOptions().size()) {
+                        VoteManager.getInstance().castVote(player.getUuid(), slot);
+                    }
+                }
+            }
+            if (GameManager.getInstance().getState() != GameState.WAITING) {
+                for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                    player.sendMessage(HudManager.buildActionBar(server), true);
                 }
             }
         });
