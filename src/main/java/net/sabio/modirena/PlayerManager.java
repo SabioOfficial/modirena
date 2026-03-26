@@ -62,4 +62,7 @@ public class PlayerManager {
     public void clearDeathPosition(UUID uuid) {
         deathPositions.remove(uuid);
     }
+    public void clearAllDeathPositions() {
+        deathPositions.clear();
+    }
 }

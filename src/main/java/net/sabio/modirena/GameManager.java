@@ -6,6 +6,7 @@ import net.sabio.modirena.modifier.Modifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GameManager {
     private static GameManager instance;
@@ -75,6 +76,7 @@ public class GameManager {
         timer.start(90, this::transitionToResults);
     }
     private void transitionToResults() {
+        PlayerManager.getInstance().clearAllDeathPositions();
         for (Modifier modifier : activeModifiers) {
             modifier.onDeactivate(server);
         }
@@ -85,5 +87,15 @@ public class GameManager {
             ArenaManager.getInstance().sendPlayerToLobby(player);
         }
         timer.start(10, this::transitionToVoting);
+    }
+    public void checkRoundEnd() {
+        if (state != GameState.COMBAT) return;
+        List<ServerPlayerEntity> alive = server.getPlayerManager().getPlayerList().stream()
+                .filter(player -> PlayerManager.getInstance().getState(player) == PlayerState.ALIVE)
+                .toList();
+        if (alive.size() <= 1) {
+            timer.stop();
+            transitionToResults();
+        }
     }
 }

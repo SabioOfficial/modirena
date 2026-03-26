@@ -110,6 +110,7 @@ public class Modirena implements ModInitializer {
             if (!PlayerManager.getInstance().isInGame(player)) return;
             PlayerManager.getInstance().setDeathPosition(player, player.getX(), player.getY(), player.getZ());
             PlayerManager.getInstance().setState(player, PlayerState.SPECTATING);
+            GameManager.getInstance().checkRoundEnd();
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
             if (!PlayerManager.getInstance().isInGame(newPlayer)) return;
