@@ -2,9 +2,11 @@ package net.sabio.modirena;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.rule.GameRules;
 import net.sabio.modirena.modifier.Modifier;
 import net.sabio.modirena.modifier.ModifierRegistry;
 
@@ -23,6 +25,7 @@ public class Modirena implements ModInitializer {
         LOGGER.info("registered commands");
         PlayerManager.getInstance();
         LOGGER.info("playermanager ready.");
+        PlayerBlockBreakEvents.BEFORE.register((world, player, position, state, entity) -> false);
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             GameManager.getInstance().setServer(server);
             ConfigManager.load();
@@ -33,6 +36,9 @@ public class Modirena implements ModInitializer {
             } else {
                 LOGGER.info("structures have already been placed");
             }
+            ServerWorld overworld = server.getOverworld();
+            overworld.getGameRules().setValue(GameRules.ADVANCE_TIME, false, server);
+            overworld.setTimeOfDay(6000);
         });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;
