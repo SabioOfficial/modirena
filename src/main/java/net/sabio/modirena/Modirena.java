@@ -50,6 +50,7 @@ public class Modirena implements ModInitializer {
             ));
             ServerWorld overworld = server.getOverworld();
             overworld.getGameRules().setValue(GameRules.ADVANCE_TIME, false, server);
+            overworld.getGameRules().setValue(GameRules.ADVANCE_WEATHER, false, server);
             overworld.getGameRules().setValue(GameRules.RESPAWN_RADIUS, 0, server);
             overworld.setTimeOfDay(6000);
         });
@@ -73,18 +74,25 @@ public class Modirena implements ModInitializer {
             }
         });
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
-            if (entity instanceof ServerPlayerEntity player) {
-                if (GameManager.getInstance().getState() == GameState.COMBAT) {
-                    MinecraftServer server = GameManager.getInstance().getServer();
-                    if (server != null) {
-                        server.execute(() -> player.changeGameMode(GameMode.SPECTATOR));
-                    }
-                }
-            }
+            if (!(entity instanceof ServerPlayerEntity player)) return;
+            if (GameManager.getInstance().getState() != GameState.COMBAT) return;
+            if (!PlayerManager.getInstance().isInGame(player)) return;
+            PlayerManager.getInstance().setDeathPosition(player, player.getX(), player.getY(), player.getZ());
+            PlayerManager.getInstance().setState(player, PlayerState.SPECTATING);
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
             if (!PlayerManager.getInstance().isInGame(newPlayer)) return;
-            ArenaManager.getInstance().sendPlayerToLobby(newPlayer);
+            double[] deathPos = PlayerManager.getInstance().getDeathPosition(newPlayer.getUuid());
+            if (deathPos != null) {
+                PlayerManager.getInstance().clearDeathPosition(newPlayer.getUuid());
+                newPlayer.changeGameMode(GameMode.SPECTATOR);
+                newPlayer.teleport(
+                        Objects.requireNonNull(newPlayer.getEntityWorld().getServer()).getSpawnWorld(),
+                        deathPos[0], deathPos[1], deathPos[2], Set.of(), newPlayer.getYaw(), newPlayer.getPitch(), false
+                );
+            } else {
+                ArenaManager.getInstance().sendPlayerToLobby(newPlayer);
+            }
         });
     }
 }

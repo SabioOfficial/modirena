@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 public class PlayerManager {
     private static PlayerManager instance;
     private final Map<UUID, PlayerState> players = new HashMap<>();
+    private final Map<UUID, double[]> deathPositions = new HashMap<>();
     private PlayerManager() {}
     public static PlayerManager getInstance() {
         if (instance == null) {
@@ -46,5 +47,14 @@ public class PlayerManager {
     }
     public void clear() {
         players.clear();
+    }
+    public void setDeathPosition(ServerPlayerEntity player, double x, double y, double z) {
+        deathPositions.put(player.getUuid(), new double[]{x, y, z});
+    }
+    public double[] getDeathPosition(UUID uuid) {
+        return deathPositions.get(uuid);
+    }
+    public void clearDeathPosition(UUID uuid) {
+        deathPositions.remove(uuid);
     }
 }
