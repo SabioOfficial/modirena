@@ -1,14 +1,13 @@
 package net.sabio.modirena;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +36,15 @@ public class Modirena implements ModInitializer {
         LOGGER.info("registered commands");
         PlayerManager.getInstance();
         LOGGER.info("playermanager ready.");
-        PlayerBlockBreakEvents.BEFORE.register((world, player, position, state, entity) -> false);
+        PlayerBlockBreakEvents.BEFORE.register((world, player, position, state, entity) -> {
+            if (GameManager.getInstance().getState() != GameState.COMBAT) return false;
+            if (!PlayerManager.getInstance().isInGame((ServerPlayerEntity) player)) return false;
+            boolean isAllowedBlock = state.isOf(Blocks.SHORT_GRASS) || state.isOf(Blocks.TALL_GRASS) || state.isOf(Blocks.DANDELION) || state.isOf(Blocks.POPPY);
+            if (isAllowedBlock) {
+                return true;
+            }
+            return false;
+        });
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             GameManager.getInstance().setServer(server);
             ConfigManager.load();
@@ -91,14 +98,12 @@ public class Modirena implements ModInitializer {
             PlayerState state = PlayerManager.getInstance().getState(player);
             PlayerManager.getInstance().removePlayer(player);
             if (state != PlayerState.ALIVE) return;
-            if (GameManager.getInstance().getState() != GameState.WAITING) {
-                for (Modifier modifier : GameManager.getInstance().getActiveModifiers()) {
-                    modifier.onDeactivate(server);
-                }
-                GameManager.getInstance().getActiveModifiers().clear();
-                GameManager.getInstance().setState(GameState.WAITING);
-                GameManager.getInstance().getTimer().stop();
+            if (GameManager.getInstance().getState() != GameState.COMBAT) return;
+            for (Modifier modifier : GameManager.getInstance().getActiveModifiers()) {
+                modifier.onDeactivate(server);
             }
+            GameManager.getInstance().getActiveModifiers().clear();
+            GameManager.getInstance().checkRoundEnd();
         });
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
             if (!(entity instanceof ServerPlayerEntity)) return true;
