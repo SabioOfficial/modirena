@@ -148,10 +148,8 @@ public class Modirena implements ModInitializer {
                     }
                 }
             }
-            if (GameManager.getInstance().getState() != GameState.WAITING) {
-                for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                    player.sendMessage(HudManager.buildActionBar(server), true);
-                }
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                player.sendMessage(HudManager.buildActionBar(server), true);
             }
         });
     }

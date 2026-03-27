@@ -21,6 +21,8 @@ public class HudManager {
                 .map(Modifier::getDisplayName)
                 .collect(Collectors.joining(", "));
         return switch (state) {
+            case WAITING -> Text.literal("Waiting for players...")
+                    .formatted(Formatting.GRAY);
             case VOTING -> Text.literal("Round " + round + "/5")
                     .formatted(Formatting.YELLOW)
                     .append(Text.literal("  |  ").formatted(Formatting.DARK_GRAY))
@@ -35,11 +37,10 @@ public class HudManager {
                     .append(Text.literal("  |  ").formatted(Formatting.DARK_GRAY))
                     .append(Text.literal(seconds + "s").formatted(Formatting.YELLOW))
                     .append(Text.literal("  |  " + modifiers).formatted(Formatting.AQUA));
-            case RESULTS -> Text.literal("Results")
+            case RESULTS -> Text.literal("Intermission")
                     .formatted(Formatting.AQUA)
                     .append(Text.literal("  |  Next round in ").formatted(Formatting.WHITE))
                     .append(Text.literal(seconds + "s").formatted(Formatting.YELLOW));
-            default -> Text.literal("Waiting for players");
         };
     }
 }
