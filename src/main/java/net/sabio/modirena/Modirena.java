@@ -14,7 +14,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.WorldProperties;
 import net.minecraft.world.rule.GameRules;
-import net.sabio.modirena.modifier.Modifier;
 import net.sabio.modirena.modifier.ModifierRegistry;
 
 import java.util.List;
@@ -31,8 +30,6 @@ public class Modirena implements ModInitializer {
         GameManager.getInstance();
         LOGGER.info("gamemanager ready. state " + GameManager.getInstance().getState());
         ModifierRegistry.registerAll();
-        LOGGER.info("registered modifiers " + ModifierRegistry.getAll().size());
-        ModirenaCommands.register();
         LOGGER.info("registered commands");
         PlayerManager.getInstance();
         LOGGER.info("playermanager ready.");
