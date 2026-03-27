@@ -10,10 +10,13 @@ public class ModifierRegistry {
     private static final Map<String, Modifier> MODIFIERS = new LinkedHashMap<>();
     public static void registerAll() {
         register(new Blackout());
+        register(new Giant());
         register(new GlassCannon());
+        register(new Invisibility());
         register(new LowGravity());
         register(new Poisoned());
         register(new SpeedDemon());
+        register(new WitheringAway());
     }
     private static void register(Modifier modifier) {
         MODIFIERS.put(modifier.getId(), modifier);
