@@ -59,6 +59,7 @@ public class Modirena implements ModInitializer {
             overworld.getGameRules().setValue(GameRules.ADVANCE_TIME, false, server);
             overworld.getGameRules().setValue(GameRules.ADVANCE_WEATHER, false, server);
             overworld.getGameRules().setValue(GameRules.RESPAWN_RADIUS, 0, server);
+            overworld.getGameRules().setValue(GameRules.DO_TILE_DROPS, false, server);
             overworld.setTimeOfDay(6000);
         });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
